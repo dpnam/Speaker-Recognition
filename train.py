@@ -34,7 +34,7 @@ def train(data_loader, model_utils, epoch):
         optimizer.step()
         loss_s.append(loss.item())
         
-        predictions = np.argmax(pred_logits.detach().cpu().numpy(),axis=1)
+        predictions = np.argmax(pred_logits.detach().cpu().numpy(), axis=1)
         for predict in predictions:
             predict_s.append(predict)
 
@@ -43,7 +43,7 @@ def train(data_loader, model_utils, epoch):
             
     # metrics
     mean_acc = round(accuracy_score(label_s, predict_s), 4)
-    mean_precision = round(precision_score(label_s, predict_s, average='macro'), 2)
+    mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 2)
     mean_loss = round(np.mean(np.asarray(loss_s)), 4)
 
     print(f'Epoch #{epoch}:')
@@ -81,13 +81,13 @@ def validation(data_loader, model_utils, epoch):
             features, labels = features.to(device),labels.to(device)
 
             # feed-forward model
-            pred_logits,x_vec = model(features)
+            pred_logits, x_vec = model(features)
 
             # loss
             loss = loss_func(pred_logits, labels)
             loss_s.append(loss.item())
           
-            predictions = np.argmax(pred_logits.detach().cpu().numpy(),axis=1)
+            predictions = np.argmax(pred_logits.detach().cpu().numpy(), axis=1)
             for predict in predictions:
                 predict_s.append(predict)
 
@@ -96,7 +96,7 @@ def validation(data_loader, model_utils, epoch):
                 
          # metrics
         mean_acc = round(accuracy_score(label_s, predict_s))
-        mean_precision = round(precision_score(label_s, predict_s, average='macro'), 2)
+        mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 2)
         mean_loss = np.mean(np.asarray(loss_s))
 
         print(f'>> Validation: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision}')
