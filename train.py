@@ -19,7 +19,7 @@ def train(data_loader, model_utils, epoch):
     model.train()
     for i_batch, sample_batched in enumerate(data_loader):
         # process input, output
-        features = torch.from_numpy(np.asarray([torch_tensor.numpy().T for torch_tensor in sample_batched[0]])).float()
+        features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
         labels = torch.from_numpy(np.asarray([torch_tensor[0].numpy() for torch_tensor in sample_batched[1]]))
         features, labels = features.to(device), labels.to(device)
         features.requires_grad = True
@@ -76,7 +76,7 @@ def validation(data_loader, model_utils, epoch):
 
         for i_batch, sample_batched in enumerate(data_loader):
             # process input, output
-            features = torch.from_numpy(np.asarray([torch_tensor.numpy().T for torch_tensor in sample_batched[0]])).float()
+            features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
             labels = torch.from_numpy(np.asarray([torch_tensor[0].numpy() for torch_tensor in sample_batched[1]]))
             features, labels = features.to(device), labels.to(device)
 

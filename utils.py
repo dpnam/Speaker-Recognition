@@ -120,6 +120,9 @@ class FeatureExtraction:
     filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)
     filter_banks = np.log(filter_banks)
 
+    # normalize
+    filter_banks -= (np.mean(filter_banks, axis=0) + 1e-8)
+
     # return
     return filter_banks, energy_frames
 
@@ -134,6 +137,7 @@ class FeatureExtraction:
 
     # append energy
     cepstral[:,0] = np.log(energy_frames)
+    cepstral -= (np.mean(cepstral, axis=0) + 1e-8)
 
     # return
     mfcc = np.concatenate((cepstral,
@@ -141,9 +145,9 @@ class FeatureExtraction:
                            lb.feature.delta(cepstral, order=2)),
                            axis=1)
 
-    return mfcc.T
+    return mfcc
 
-  def run(self, max_duration=-1, use_es=False):
+  def run(self, max_duration=-1, type_feature='mfcc', use_es=False):
     # params
     file_name = self.wave_path.split('/')[-2]
     sample_rate = self.sample_rate
@@ -171,16 +175,24 @@ class FeatureExtraction:
 
     # use envelope subtract?
     if use_es:
-      # es-mfcc
       envelope_params, frames = self.es(frames)
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=80)
-      feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
-      feature = np.concatenate((envelope_params, feature), axis=1)
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=24)
+      
+      if type_feature == 'mfcc':
+        feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
+        feature = np.concatenate((envelope_params, feature), axis=1)
+
+      else:
+         feature = filter_banks
 
     else:
-      # mfcc
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=80)
-      feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=24)
+      
+      if type_feature == 'mfcc':
+         feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
+         
+      else:
+         feature = filter_banks
 
     # return
     # shape: (n_frame, n_feature)
