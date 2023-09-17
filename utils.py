@@ -176,7 +176,7 @@ class FeatureExtraction:
     # use envelope subtract?
     if use_es:
       envelope_params, frames = self.es(frames)
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=24)
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=40)
       
       if type_feature == 'mfcc':
         feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
@@ -186,11 +186,11 @@ class FeatureExtraction:
          feature = filter_banks
 
     else:
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=24)
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=40)
       
       if type_feature == 'mfcc':
          feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
-         
+
       else:
          feature = filter_banks
 
