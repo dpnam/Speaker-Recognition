@@ -173,13 +173,13 @@ class FeatureExtraction:
     if use_es:
       # es-mfcc
       envelope_params, frames = self.es(frames)
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=frame_size, n_filter=128)
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=80)
       feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
       feature = np.concatenate((envelope_params, feature), axis=1)
 
     else:
       # mfcc
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=frame_size, n_filter=128)
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=80)
       feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
 
     # return
