@@ -56,7 +56,7 @@ def train(data_loader, model_utils, epoch):
     model_utils['loss_func'] = loss_func
 
     # return
-    return model
+    return model_utils
 
 def validation(data_loader, model_utils, epoch):
     # get model
