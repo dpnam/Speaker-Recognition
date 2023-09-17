@@ -34,11 +34,11 @@ class TDNN(nn.Module):
 
         # Unfold input into smaller temporal contexts
         x = F.unfold(x, (self.context_size, self.input_dim), 
-                    stride=(1,self.input_dim), 
-                    dilation=(self.dilation,1))
+                    stride=(1, self.input_dim), 
+                    dilation=(self.dilation, 1))
 
         # N, output_dim*context_size, new_t = x.shape
-        x = x.transpose(1,2)
+        x = x.transpose(1, 2)
         x = self.kernel(x.float())
         x = self.nonlinearity(x)
         
@@ -46,20 +46,20 @@ class TDNN(nn.Module):
             x = self.drop(x)
 
         if self.batch_norm:
-            x = x.transpose(1,2)
+            x = x.transpose(1, 2)
             x = self.bn(x)
-            x = x.transpose(1,2)
+            x = x.transpose(1, 2)
 
         return x
     
 class XVector(nn.Module):
     def __init__(self, input_dim=39, num_classes=46):
         super(XVector, self).__init__()
-        self.frame1 = TDNN(input_dim=input_dim, output_dim=512, context_size=5, dilation=1,dropout_p=0.5)
-        self.frame2 = TDNN(input_dim=512, output_dim=512, context_size=3, dilation=1,dropout_p=0.5)
-        self.frame3 = TDNN(input_dim=512, output_dim=512, context_size=3, dilation=2,dropout_p=0.5)
-        self.frame4 = TDNN(input_dim=512, output_dim=512, context_size=1, dilation=1,dropout_p=0.5)
-        self.frame5 = TDNN(input_dim=512, output_dim=1500, context_size=1, dilation=3,dropout_p=0.5)
+        self.frame1 = TDNN(input_dim=input_dim, output_dim=512, context_size=5, dilation=1, dropout_p=0.5)
+        self.frame2 = TDNN(input_dim=512, output_dim=512, context_size=3, dilation=1, dropout_p=0.5)
+        self.frame3 = TDNN(input_dim=512, output_dim=512, context_size=3, dilation=2, dropout_p=0.5)
+        self.frame4 = TDNN(input_dim=512, output_dim=512, context_size=1, dilation=1, dropout_p=0.5)
+        self.frame5 = TDNN(input_dim=512, output_dim=1500, context_size=1, dilation=3, dropout_p=0.5)
 
         self.segment6 = nn.Linear(3000, 512)
         self.segment7 = nn.Linear(512, 512)
@@ -77,7 +77,7 @@ class XVector(nn.Module):
         # stats pooling
         mean = torch.mean(frame5_out, 1)
         std = torch.var(frame5_out, 1)
-        stat_pooling = torch.cat((mean,std),1)
+        stat_pooling = torch.cat((mean,std), 1)
 
         # segment level
         segment6_out = self.segment6(stat_pooling)

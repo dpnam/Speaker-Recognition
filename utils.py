@@ -185,3 +185,14 @@ class FeatureExtraction:
     # return
     # shape: (n_frame, n_feature)
     return feature
+  
+
+def collate_batch(batch):
+  features_s = []
+  label_s = []
+
+  for sample in batch:
+    features_s.append(sample['features'])
+    label_s.append((sample['label']))
+    
+  return features_s, label_s
