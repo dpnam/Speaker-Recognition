@@ -141,7 +141,7 @@ class FeatureExtraction:
                            lb.feature.delta(cepstral, order=2)),
                            axis=1)
 
-    return mfcc
+    return mfcc.T
 
   def run(self, max_duration=-1, use_es=False):
     # params
