@@ -21,7 +21,7 @@ def train(data_loader, model_utils, epoch):
         # process input, output
         features = torch.from_numpy(np.asarray([torch_tensor.numpy().T for torch_tensor in sample_batched[0]])).float()
         labels = torch.from_numpy(np.asarray([torch_tensor[0].numpy() for torch_tensor in sample_batched[1]]))
-        features, labels = features.to(device),labels.to(device)
+        features, labels = features.to(device), labels.to(device)
         features.requires_grad = True
         optimizer.zero_grad()
 
@@ -78,7 +78,7 @@ def validation(data_loader, model_utils, epoch):
             # process input, output
             features = torch.from_numpy(np.asarray([torch_tensor.numpy().T for torch_tensor in sample_batched[0]])).float()
             labels = torch.from_numpy(np.asarray([torch_tensor[0].numpy() for torch_tensor in sample_batched[1]]))
-            features, labels = features.to(device),labels.to(device)
+            features, labels = features.to(device), labels.to(device)
 
             # feed-forward model
             pred_logits, x_vec = model(features)

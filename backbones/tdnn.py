@@ -56,10 +56,10 @@ class XVector(nn.Module):
     def __init__(self, input_dim=39, num_classes=46):
         super(XVector, self).__init__()
         self.frame1 = TDNN(input_dim=input_dim, output_dim=512, context_size=5, dilation=1, dropout_p=0)
-        self.frame2 = TDNN(input_dim=512, output_dim=512, context_size=3, dilation=1, dropout_p=0)
-        self.frame3 = TDNN(input_dim=512, output_dim=512, context_size=3, dilation=2, dropout_p=0)
+        self.frame2 = TDNN(input_dim=512, output_dim=512, context_size=3, dilation=2, dropout_p=0)
+        self.frame3 = TDNN(input_dim=512, output_dim=512, context_size=3, dilation=3, dropout_p=0)
         self.frame4 = TDNN(input_dim=512, output_dim=512, context_size=1, dilation=1, dropout_p=0)
-        self.frame5 = TDNN(input_dim=512, output_dim=1500, context_size=1, dilation=3, dropout_p=0)
+        self.frame5 = TDNN(input_dim=512, output_dim=1500, context_size=1, dilation=1, dropout_p=0)
 
         self.segment6 = nn.Linear(3000, 512)
         self.segment7 = nn.Linear(512, 512)
@@ -77,7 +77,7 @@ class XVector(nn.Module):
         # stats pooling
         mean = torch.mean(frame5_out, 1)
         std = torch.var(frame5_out, 1)
-        stat_pooling = torch.cat((mean,std), 1)
+        stat_pooling = torch.cat((mean, std), 1)
 
         # segment level
         segment6_out = self.segment6(stat_pooling)
