@@ -13,7 +13,7 @@ class FeatureExtraction:
 
     # voice activate detection
     (get_speech_timestamps, save_audio, read_audio, VADIterator, collect_chunks) = vad_utils
-    
+
     speech_timestamps = get_speech_timestamps(wave, vad_model, sampling_rate=sample_rate)
     wave = collect_chunks(speech_timestamps, torch.tensor(wave)).numpy()
 
@@ -112,16 +112,13 @@ class FeatureExtraction:
         for i in range(int(bin[j+1]), int(bin[j+2])):
             fbank[j,i] = (bin[j+2]-i) / (bin[j+2]-bin[j+1])
 
-    enorm = 2.0 / (bin[2:n_filter+2] - bin[:n_filter])
-    fbank *= enorm[:, np.newaxis]
+    # enorm = 2.0 / (bin[2:n_filter+2] - bin[:n_filter])
+    # fbank *= enorm[:, np.newaxis]
 
     # compute the filterbank energies
     filter_banks = np.dot(pow_frames, fbank.T)
     filter_banks = np.where(filter_banks == 0, np.finfo(float).eps, filter_banks)
     filter_banks = np.log(filter_banks)
-
-    # normalize
-    filter_banks -= (np.mean(filter_banks, axis=0) + 1e-8)
 
     # return
     return filter_banks, energy_frames
@@ -137,7 +134,6 @@ class FeatureExtraction:
 
     # append energy
     cepstral[:,0] = np.log(energy_frames)
-    cepstral -= (np.mean(cepstral, axis=0) + 1e-8)
 
     # return
     mfcc = np.concatenate((cepstral,
@@ -146,6 +142,62 @@ class FeatureExtraction:
                            axis=1)
 
     return mfcc
+
+  def run(self, max_duration=-1, type_feature='mfcc', use_es=False):
+    # params
+    file_name = self.wave_path.split('/')[-2]
+    sample_rate = self.sample_rate
+    wave = self.wave
+
+     # framing
+    if max_duration == -1:
+        ratio_scale = len(wave)/sample_rate
+        frame_size = int(25000*ratio_scale)/1000000
+        frame_stride = int(10000*ratio_scale)/1000000
+
+    else:
+        max_length = max_duration*sample_rate
+        if len(wave) >= max_length:
+           wave = wave[:max_length]
+        else:
+           num_pad = max_length - len(wave)
+           wave = np.pad(wave, (0, num_pad), 'constant', constant_values=(0))
+
+        frame_size = 0.025
+        frame_stride = 0.01
+
+    emphasized_wave = self.pre_emphasis(wave, alpha=0.97)
+    frames = self.framing(emphasized_wave, frame_size=frame_size, frame_stride=frame_stride)
+
+    # use envelope subtract?
+    if use_es:
+      envelope_params, frames = self.es(frames)
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=40)
+
+      if type_feature == 'mfcc':
+        feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
+        feature = np.concatenate((envelope_params, feature), axis=1)
+
+      else:
+         feature = filter_banks
+
+    else:
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=40)
+
+      if type_feature == 'mfcc':
+         feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
+
+      else:
+         feature = filter_banks
+
+    # normalize
+    mu_feature = np.mean(feature, 0, keepdims=True)
+    std_feature = np.std(feature, 0, keepdims=True)
+    feature = (feature - mu_feature) / (std_feature + 1e-5)
+
+    # return
+    # shape: (n_frame, n_feature)
+    return feature
 
   def run(self, max_duration=-1, type_feature='mfcc', use_es=False):
     # params
