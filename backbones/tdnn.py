@@ -76,13 +76,87 @@ class XVector(nn.Module):
 
         # stats pooling
         mean = torch.mean(frame5_out, 1)
-        std = torch.var(frame5_out, 1)
+        std = torch.std(frame5_out, 1)
         stat_pooling = torch.cat((mean, std), 1)
 
         # segment level
         segment6_out = self.segment6(stat_pooling)
         x_vec = self.segment7(segment6_out)
-        pred_logits = self.softmax(self.output(x_vec))
+
+        # pred_logits = self.softmax(self.output(x_vec))
+        pred_logits = self.output(x_vec)
 
         # return
         return pred_logits, x_vec
+    
+# class XVector(nn.Module):
+#     def __init__(self, input_dim, num_classes):
+#         super().__init__()
+
+#         self.frame1 = nn.Sequential(
+#             nn.Conv1d(input_dim, 512, kernel_size=5, dilation=1),
+#             nn.BatchNorm1d(512),
+#             nn.ReLU()
+#          )
+        
+#         self.frame2 = nn.Sequential(
+#             nn.Conv1d(512, 512, kernel_size=3, dilation=1),
+#             nn.BatchNorm1d(512),
+#             nn.ReLU()
+#             )
+        
+#         self.frame3 = nn.Sequential(
+#             nn.Conv1d(512, 512, kernel_size=3, dilation=2),
+#             nn.BatchNorm1d(512),
+#             nn.ReLU()
+#             )
+        
+#         self.frame4 = nn.Sequential(
+#             nn.Conv1d(512, 512, kernel_size=1, dilation=1),
+#             nn.BatchNorm1d(512),
+#             nn.ReLU()
+#             )
+        
+#         self.frame5 = nn.Sequential(
+#             nn.Conv1d(512, 1500, kernel_size=1, dilation=1),
+#             nn.BatchNorm1d(1500),
+#             nn.ReLU()
+#             )
+        
+#         self.segment6 = nn.Sequential(
+#             nn.Linear(3000, 512),
+#             nn.BatchNorm1d(512),
+#             nn.ReLU()
+#             )
+        
+#         self.segment7 = nn.Sequential(
+#             nn.Linear(512, 512),
+#             nn.BatchNorm1d(512),
+#             nn.ReLU()
+#             )
+
+#         self.output = nn.Sequential(
+#             nn.Linear(512, num_classes),
+#             # nn.Softmax()
+#             )
+        
+#     def forward(self, inputs):
+#         # frame level
+#         frame1_out = self.frame1(inputs.T)
+#         frame2_out = self.frame2(frame1_out)
+#         frame3_out = self.frame3(frame2_out)
+#         frame4_out = self.frame4(frame3_out)
+#         frame5_out = self.frame5(frame4_out)
+
+#         # stats pooling
+#         mean = torch.mean(frame5_out, 2) 
+#         std = torch.std(frame5_out, 2)
+#         stat_pooling = torch.cat((mean, std), 1)
+
+#         # segment level
+#         segment6_out = self.segment6(stat_pooling)
+#         x_vec = self.segment7(segment6_out)
+#         pred_logits = self.output(x_vec)
+
+#         # return
+#         return pred_logits, x_vec
