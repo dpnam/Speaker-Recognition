@@ -172,7 +172,7 @@ class FeatureExtraction:
     # use envelope subtract?
     if use_es:
       envelope_params, frames = self.es(frames)
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=40)
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=1024, n_filter=40)
 
       if type_feature == 'mfcc':
         feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
@@ -182,7 +182,7 @@ class FeatureExtraction:
          feature = filter_banks
 
     else:
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=40)
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=1024, n_filter=40)
 
       if type_feature == 'mfcc':
          feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
@@ -199,57 +199,6 @@ class FeatureExtraction:
     # shape: (n_frame, n_feature)
     return feature
 
-  def run(self, max_duration=-1, type_feature='mfcc', use_es=False):
-    # params
-    file_name = self.wave_path.split('/')[-2]
-    sample_rate = self.sample_rate
-    wave = self.wave
-
-     # framing
-    if max_duration == -1:
-        ratio_scale = len(wave)/sample_rate
-        frame_size = int(25000*ratio_scale)/1000000
-        frame_stride = int(10000*ratio_scale)/1000000
-
-    else:
-        max_length = max_duration*sample_rate
-        if len(wave) >= max_length:
-           wave = wave[:max_length]
-        else:
-           num_pad = max_length - len(wave)
-           wave = np.pad(wave, (0, num_pad), 'constant', constant_values=(0))
-
-        frame_size = 0.025
-        frame_stride = 0.01
-
-    emphasized_wave = self.pre_emphasis(wave, alpha=0.97)
-    frames = self.framing(emphasized_wave, frame_size=frame_size, frame_stride=frame_stride)
-
-    # use envelope subtract?
-    if use_es:
-      envelope_params, frames = self.es(frames)
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=40)
-      
-      if type_feature == 'mfcc':
-        feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
-        feature = np.concatenate((envelope_params, feature), axis=1)
-
-      else:
-         feature = filter_banks
-
-    else:
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=512, n_filter=40)
-      
-      if type_feature == 'mfcc':
-         feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
-
-      else:
-         feature = filter_banks
-
-    # return
-    # shape: (n_frame, n_feature)
-    return feature
-  
 def collate_batch(batch):
   features_s = []
   label_s = []
