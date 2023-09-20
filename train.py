@@ -1,4 +1,3 @@
-import os
 import torch
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_score
@@ -43,10 +42,9 @@ def train(data_loader, model_utils, epoch):
             
     # metrics
     mean_acc = round(accuracy_score(label_s, predict_s), 4)
-    mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 2)
+    mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 4)
     mean_loss = round(np.mean(np.asarray(loss_s)), 4)
 
-    print(f'Epoch #{epoch}:')
     print(f'>> Training: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision}')
 
     # update model_utils
@@ -95,13 +93,9 @@ def validation(data_loader, model_utils, epoch):
                 label_s.append(label)
                 
          # metrics
-        mean_acc = round(accuracy_score(label_s, predict_s))
+        mean_acc = round(accuracy_score(label_s, predict_s), 4)
         mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 2)
-        mean_loss = np.mean(np.asarray(loss_s))
+        mean_loss = round(np.mean(np.asarray(loss_s)), 4)
 
         print(f'>> Validation: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision}')
-
-        # save model        
-        save_path = f'{save}_best_check_point_{epoch}_{mean_loss}'
-        state_model = {'model': model.state_dict(),' optimizer': optimizer.state_dict(),'epoch': epoch}
-        torch.save(state_model, save_path)
+        return mean_loss, mean_acc, mean_precision

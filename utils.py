@@ -250,7 +250,6 @@ class FeatureExtraction:
     # shape: (n_frame, n_feature)
     return feature
   
-
 def collate_batch(batch):
   features_s = []
   label_s = []
@@ -260,3 +259,43 @@ def collate_batch(batch):
     label_s.append((sample['label']))
     
   return features_s, label_s
+
+class EarlyStopping:
+    def __init__(self, patience=7, delta=0, checkpoint_path='checkpoint.pt'):
+        """
+        Args:
+            patience (int): How long to wait after last time validation loss improved.
+                            Default: 7
+            delta (float): Minimum change in the monitored quantity to qualify as an improvement.
+                            Default: 0
+            path (str): Path for the checkpoint to be saved to.
+                            Default: 'checkpoint.pt'
+        """
+        self.patience = patience
+        self.counter = 0
+        self.best_score = None
+        self.early_stop = False
+        self.val_loss_min = np.Inf
+        self.delta = delta
+        self.checkpoint_path = checkpoint_path
+
+    def __call__(self, model, val_metric, sign_metric='+'):
+
+        score = val_metric if sign_metric == '+' else -val_metric
+
+        if self.best_score is None:
+            self.best_score = score
+            
+        elif score < self.best_score + self.delta:
+            self.counter += 1
+            if self.counter >= self.patience:
+                self.early_stop = True
+        else:
+            self.best_score = score
+            self.save_checkpoint(model, val_metric)
+            self.counter = 0
+
+    def save_checkpoint(self, model, val_metric):
+        torch.save(model.state_dict(), self.checkpoint_path)
+
+        self.val_loss_min = val_metric
