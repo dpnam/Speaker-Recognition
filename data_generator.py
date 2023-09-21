@@ -5,6 +5,7 @@ import sys
 import utils
 import subprocess
 import numpy as np
+import soundfile as sf
 
 # install https://github.com/snakers4/silero-vad
 USE_ONNX = False
@@ -37,9 +38,17 @@ class DataGenerator():
         # get params
         audio_path = self.audio_paths[index]
         id_label = self.id_labels[index]
+
+        # wave utils
+        wave, sample_rate = sf.read(audio_path)
+
+        wave_utils = {}
+        wave_utils['wave_path'] = audio_path
+        wave_utils['wave'] = wave
+        wave_utils['sample_rate'] = sample_rate
         
         # feature extraction
-        feature = utils.FeatureExtraction(audio_path, vad_model, vad_utils).run(max_duration=4, type_feature='mfcc', use_es=False)
+        feature = utils.FeatureExtraction(wave_utils, vad_model, vad_utils).run(max_duration=4, type_feature='mfcc', use_es=False)
         sample = {
             'features': torch.from_numpy(np.ascontiguousarray(feature)),
             'label': torch.from_numpy(np.ascontiguousarray(id_label))

@@ -4,12 +4,13 @@ torch.set_num_threads(1)
 import numpy as np
 import librosa as lb
 import soundfile as sf
-from scipy.fftpack import dct
 
 class FeatureExtraction:
-  def __init__(self, wave_path, vad_model, vad_utils):
-    # load wave
-    wave, sample_rate = sf.read(wave_path)
+  def __init__(self, wave_utils, vad_model, vad_utils):
+    # get wave
+    wave_path = wave_utils['wave_path']
+    wave = wave_utils['wave']
+    sample_rate = wave_utils['sample_rate']
 
     # voice activate detection
     (get_speech_timestamps, save_audio, read_audio, VADIterator, collect_chunks) = vad_utils
@@ -222,6 +223,7 @@ class EarlyStopping:
         """
         self.patience = patience
         self.counter = 0
+        self.best_model = None
         self.best_score = None
         self.early_stop = False
         self.val_loss_min = np.Inf
@@ -234,6 +236,7 @@ class EarlyStopping:
 
         if self.best_score is None:
             self.best_score = score
+            self.best_model = model
             
         elif score < self.best_score + self.delta:
             self.counter += 1
@@ -241,7 +244,7 @@ class EarlyStopping:
                 self.early_stop = True
         else:
             self.best_score = score
-            self.save_checkpoint(model, val_metric)
+            self.save_checkpoint(self.best_model, val_metric)
             self.counter = 0
 
     def save_checkpoint(self, model, val_metric):
