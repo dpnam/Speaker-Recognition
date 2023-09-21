@@ -3,7 +3,7 @@ torch.set_num_threads(1)
 
 import numpy as np
 import librosa as lb
-import soundfile as sf
+from scipy.fftpack import dct
 
 class FeatureExtraction:
   def __init__(self, wave_utils, vad_model, vad_utils):
@@ -242,10 +242,13 @@ class EarlyStopping:
             self.counter += 1
             if self.counter >= self.patience:
                 self.early_stop = True
+                self.save_checkpoint(self.best_model, val_metric)
+
         else:
             self.best_score = score
-            self.save_checkpoint(self.best_model, val_metric)
+            self.best_score = model
             self.counter = 0
+            self.save_checkpoint(self.best_model, val_metric)
 
     def save_checkpoint(self, model, val_metric):
         torch.save(model.state_dict(), self.checkpoint_path)
