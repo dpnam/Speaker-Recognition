@@ -246,7 +246,7 @@ class EarlyStopping:
 
         else:
             self.best_score = score
-            self.best_score = model
+            self.best_model = model
             self.counter = 0
             self.save_checkpoint(self.best_model, val_metric)
 
