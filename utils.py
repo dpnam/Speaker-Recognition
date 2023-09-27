@@ -144,28 +144,30 @@ class FeatureExtraction:
 
     return mfcc
 
-  def run(self, max_duration=-1, type_feature='mfcc', use_es=False):
+  def run(self, max_duration=4, type_feature='mfcc', use_scale=False, use_es=False):
     # params
     file_name = self.wave_path.split('/')[-2]
     sample_rate = self.sample_rate
     wave = self.wave
 
-     # framing
-    if max_duration == -1:
-        ratio_scale = len(wave)/sample_rate
-        frame_size = int(25000*ratio_scale)/1000000
-        frame_stride = int(10000*ratio_scale)/1000000
+    # framing
+    if use_scale == False:
+          max_length = max_duration*sample_rate
+          if len(wave) >= max_length:
+             wave = wave[:max_length]
+          else:
+             num_pad = max_length - len(wave)
+             wave = np.pad(wave, (0, num_pad), 'constant', constant_values=(0))
+
+          frame_size = 0.025
+          frame_stride = 0.01
 
     else:
-        max_length = max_duration*sample_rate
-        if len(wave) >= max_length:
-           wave = wave[:max_length]
-        else:
-           num_pad = max_length - len(wave)
-           wave = np.pad(wave, (0, num_pad), 'constant', constant_values=(0))
+      max_length = max_duration*sample_rate
+      ratio_scale = len(wave)/max_length
 
-        frame_size = 0.025
-        frame_stride = 0.01
+      frame_size = int(25000*ratio_scale)/1000000
+      frame_stride = int(10000*ratio_scale)/1000000
 
     emphasized_wave = self.pre_emphasis(wave, alpha=0.97)
     frames = self.framing(emphasized_wave, frame_size=frame_size, frame_stride=frame_stride)
@@ -181,6 +183,7 @@ class FeatureExtraction:
 
       else:
          feature = filter_banks
+         feature = np.concatenate((envelope_params, feature), axis=1)
 
     else:
       filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=1024, n_filter=40)
@@ -199,58 +202,3 @@ class FeatureExtraction:
     # return
     # shape: (n_frame, n_feature)
     return feature
-
-def collate_batch(batch):
-  features_s = []
-  label_s = []
-
-  for sample in batch:
-    features_s.append(sample['features'])
-    label_s.append((sample['label']))
-    
-  return features_s, label_s
-
-class EarlyStopping:
-    def __init__(self, patience=7, delta=0, checkpoint_path='checkpoint.pt'):
-        """
-        Args:
-            patience (int): How long to wait after last time validation loss improved.
-                            Default: 7
-            delta (float): Minimum change in the monitored quantity to qualify as an improvement.
-                            Default: 0
-            path (str): Path for the checkpoint to be saved to.
-                            Default: 'checkpoint.pt'
-        """
-        self.patience = patience
-        self.counter = 0
-        self.best_model = None
-        self.best_score = None
-        self.early_stop = False
-        self.val_loss_min = np.Inf
-        self.delta = delta
-        self.checkpoint_path = checkpoint_path
-
-    def __call__(self, model, val_metric, sign_metric='+'):
-
-        score = val_metric if sign_metric == '+' else -val_metric
-
-        if self.best_score is None:
-            self.best_score = score
-            self.best_model = model
-            
-        elif score < self.best_score + self.delta:
-            self.counter += 1
-            if self.counter >= self.patience:
-                self.early_stop = True
-                self.save_checkpoint(self.best_model, val_metric)
-
-        else:
-            self.best_score = score
-            self.best_model = model
-            self.counter = 0
-            self.save_checkpoint(self.best_model, val_metric)
-
-    def save_checkpoint(self, model, val_metric):
-        torch.save(model.state_dict(), self.checkpoint_path)
-
-        self.val_loss_min = val_metric

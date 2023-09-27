@@ -48,7 +48,7 @@ class DataGenerator():
         wave_utils['sample_rate'] = sample_rate
         
         # feature extraction
-        feature = utils.FeatureExtraction(wave_utils, vad_model, vad_utils).run(max_duration=4, type_feature='mfcc', use_es=False)
+        feature = utils.FeatureExtraction(wave_utils, vad_model, vad_utils).run(max_duration=4, use_scale=False, use_es=False)
         sample = {
             'features': torch.from_numpy(np.ascontiguousarray(feature)),
             'label': torch.from_numpy(np.ascontiguousarray(id_label))

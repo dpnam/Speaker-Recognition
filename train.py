@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_score
 
-def train(data_loader, model_utils, epoch):
+def train(data_loader, model_utils):
     # get model
     device = model_utils['device']
     model = model_utils['model']
@@ -56,7 +56,7 @@ def train(data_loader, model_utils, epoch):
     # return
     return model_utils
 
-def validation(data_loader, model_utils, epoch):
+def validation(data_loader, model_utils):
     # get model
     device = model_utils['device']
     model = model_utils['model']
