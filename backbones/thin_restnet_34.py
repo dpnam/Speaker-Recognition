@@ -18,7 +18,7 @@ class IdentityBlock2D(nn.Module):
                                       out_channels=filters1,
                                       kernel_size=(1, 1),
                                       stride=(1, 1), groups=1, bias=False)
-        nn.init.orthogonal_(self.conv_1x1_reduce.weight)
+        # nn.init.orthogonal_(self.conv_1x1_reduce.weight)
 
         # conv_1x1_reduce_bn
         self.conv_1x1_reduce_bn = BatchNorm2d(num_features=filters1,
@@ -30,7 +30,7 @@ class IdentityBlock2D(nn.Module):
                                out_channels=filters2,
                                kernel_size=(3, 3),
                                stride=(1, 1), groups=1, bias=False)
-        nn.init.orthogonal_(self.conv_3x3.weight)
+        # nn.init.orthogonal_(self.conv_3x3.weight)
 
         # conv_3x3_bn
         self.conv_3x3_bn = BatchNorm2d(num_features=filters2,
@@ -42,7 +42,7 @@ class IdentityBlock2D(nn.Module):
                                         out_channels=filters3,
                                         kernel_size=(1, 1),
                                         stride=(1, 1), groups=1, bias=False)
-        nn.init.orthogonal_(self.conv_1x1_increase.weight)
+        # nn.init.orthogonal_(self.conv_1x1_increase.weight)
 
         # conv_1x1_increase_bn
         self.conv_1x1_increase_bn = BatchNorm2d(num_features=filters3,
@@ -72,7 +72,7 @@ class ConvBlock2D(nn.Module):
                                       out_channels=filters1,
                                       kernel_size=(1, 1),
                                       stride=stride, groups=1, bias=False)
-        nn.init.orthogonal_(self.conv_1x1_reduce.weight)
+        # nn.init.orthogonal_(self.conv_1x1_reduce.weight)
 
         # conv_1x1_reduce_bn
         self.conv_1x1_reduce_bn = BatchNorm2d(num_features=filters1,
@@ -84,7 +84,7 @@ class ConvBlock2D(nn.Module):
                                     out_channels=filters3,
                                     kernel_size=(1, 1),
                                     stride=stride, groups=1, bias=False)
-        nn.init.orthogonal_(self.conv_1x1_proj.weight)
+        # nn.init.orthogonal_(self.conv_1x1_proj.weight)
 
          # conv_1x1_proj_bn
         self.conv_1x1_proj_bn = BatchNorm2d(num_features=filters3,
@@ -96,7 +96,7 @@ class ConvBlock2D(nn.Module):
                                out_channels=filters2,
                                kernel_size=(3, 3),
                                stride=(1, 1), groups=1, bias=False)
-        nn.init.orthogonal_(self.conv_3x3.weight)
+        # nn.init.orthogonal_(self.conv_3x3.weight)
 
         # conv_3x3_bn
         self.conv_3x3_bn = BatchNorm2d(num_features=filters2,
@@ -108,7 +108,7 @@ class ConvBlock2D(nn.Module):
                                         out_channels=filters3,
                                         kernel_size=(1, 1),
                                         stride=(1, 1), groups=1, bias=False)
-        nn.init.orthogonal_(self.conv_1x1_increase.weight)
+        # nn.init.orthogonal_(self.conv_1x1_increase.weight)
 
         # conv_1x1_increase_bn
         self.conv_1x1_increase_bn = BatchNorm2d(num_features=filters3,
@@ -139,7 +139,7 @@ class ThinResnet34(nn.Module):
         # ===============================================
         self.conv1_1_3x3_s1 = Conv2d(in_channels=1, out_channels=64, kernel_size=(7, 7),
                                      stride=(1, 1), groups=1, bias=False)
-        nn.init.orthogonal_(self.conv1_1_3x3_s1.weight)
+        # nn.init.orthogonal_(self.conv1_1_3x3_s1.weight)
         self.conv1_1_3x3_s1_bn = BatchNorm2d(
             num_features=64, eps=eps_const_value, momentum=momentum_const_value)
 
@@ -238,12 +238,13 @@ class GhostVLAD(nn.Module):
         return vlad_feats
     
 class ThinResnet34GhostVLAD(nn.Module):
-    def __init__(self, vlad_cluster, ghost_cluster, num_classes):
+    def __init__(self, vlad_cluster, ghost_cluster, num_classes, device):
         super(ThinResnet34GhostVLAD, self).__init__()
 
         self.vlad_cluster = vlad_cluster
         self.ghost_cluster = ghost_cluster
         self.num_classes = num_classes
+        self.device = device
 
         # ===============================================
         #                 ThinResnet34
@@ -256,14 +257,14 @@ class ThinResnet34GhostVLAD(nn.Module):
 
         self.conv_1x7 = Conv2d(in_channels=512, out_channels=512, kernel_size=(1, 7),
                                stride=(1, 1), groups=1, bias=False)
-        nn.init.orthogonal_(self.conv_1x7.weight)
+        # nn.init.orthogonal_(self.conv_1x7.weight)
         
         # ===============================================
         #            Feature Aggregation
         # ===============================================
         self.gvlad_center = Conv2d(in_channels=512, out_channels=self.vlad_cluster+self.ghost_cluster,
                                    kernel_size=(1, 7), stride=(1, 1), groups=1, bias=False)
-        nn.init.orthogonal_(self.gvlad_center.weight)
+        # nn.init.orthogonal_(self.gvlad_center.weight)
 
     def forward(self, x):
         # x: (batch, 1, num_feature, n_frame)
@@ -274,20 +275,20 @@ class ThinResnet34GhostVLAD(nn.Module):
 
         # GhostVLAD
         x_fc_center = torch.cat((x_fc, x_center), 1)
-        ghost_vlad = GhostVLAD(in_dim=x_fc_center.shape[1], vlad_cluster=self.vlad_cluster, ghost_cluster=self.ghost_cluster)
+        ghost_vlad = GhostVLAD(in_dim=x_fc_center.shape[1], vlad_cluster=self.vlad_cluster, ghost_cluster=self.ghost_cluster).to(self.device)
         x = ghost_vlad(x_fc_center)
 
         # Fully Connected
-        fc_layer = nn.Linear(in_features=x.shape[1], out_features=512)
-        nn.init.orthogonal_(fc_layer.weight)
+        fc_layer = nn.Linear(in_features=x.shape[1], out_features=512).to(self.device)
+        # nn.init.orthogonal_(fc_layer.weight)
         embedding = fc_layer(x)
 
         relu = nn.ReLU()
         embedding = relu(embedding)
 
         # Output
-        output_layer = nn.Linear(in_features=embedding.shape[1], out_features=self.num_classes)
-        nn.init.orthogonal_(output_layer.weight)
+        output_layer = nn.Linear(in_features=embedding.shape[1], out_features=self.num_classes).to(self.device)
+        # nn.init.orthogonal_(output_layer.weight)
         pred_logits = output_layer(embedding)
 
         softmax = nn.Softmax()
