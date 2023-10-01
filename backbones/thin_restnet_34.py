@@ -1,3 +1,4 @@
+# https://github.com/jackaduma/SpeakerRecognition-ResNet-GhostVLAD/tree/main
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -204,7 +205,7 @@ class ThinResnet34(nn.Module):
 
         x = F.max_pool2d(x, kernel_size=(3, 1), stride=(2, 2), padding=0, ceil_mode=False)
         return x
-    
+
 class GhostVLAD(nn.Module):
     def __init__(self, in_dim, vlad_cluster, ghost_cluster):
         super(GhostVLAD, self).__init__()
@@ -214,8 +215,7 @@ class GhostVLAD(nn.Module):
         self.conv1 = nn.Conv2d(in_dim,
                                vlad_cluster + ghost_cluster,
                                kernel_size=(1, 1))
-        self.centers = nn.Parameter(torch.rand(vlad_cluster + ghost_cluster,
-                                               in_dim))
+        self.centers = nn.Parameter(torch.rand(vlad_cluster + ghost_cluster, in_dim))
 
     def forward(self, x):
         N, C = x.shape[:2]
@@ -233,10 +233,10 @@ class GhostVLAD(nn.Module):
         cluster_res = cluster_res[:, :self.vlad_cluster, :]  # ghost
         cluster_res = F.normalize(cluster_res, p=2, dim=-1)
         vlad_feats = cluster_res.view(N, -1)
-        vlad_feats = F.normalize(vlad_feats, p=2, dim=-1)
+        # vlad_feats = F.normalize(vlad_feats, p=2, dim=-1)
 
         return vlad_feats
-    
+
 class ThinResnet34GhostVLAD(nn.Module):
     def __init__(self, vlad_cluster, ghost_cluster, num_classes, device):
         super(ThinResnet34GhostVLAD, self).__init__()
@@ -258,7 +258,7 @@ class ThinResnet34GhostVLAD(nn.Module):
         self.conv_1x7 = Conv2d(in_channels=512, out_channels=512, kernel_size=(1, 7),
                                stride=(1, 1), groups=1, bias=False)
         # nn.init.orthogonal_(self.conv_1x7.weight)
-        
+
         # ===============================================
         #            Feature Aggregation
         # ===============================================
@@ -268,15 +268,19 @@ class ThinResnet34GhostVLAD(nn.Module):
 
     def forward(self, x):
         # x: (batch, 1, num_feature, n_frame)
-
         x = self.thin_resnet_34(x)
         x_fc = self.conv_1x7(x)
-        x_center = self.gvlad_center(x)
 
         # GhostVLAD
+        x_center = self.gvlad_center(x)
         x_fc_center = torch.cat((x_fc, x_center), 1)
         ghost_vlad = GhostVLAD(in_dim=x_fc_center.shape[1], vlad_cluster=self.vlad_cluster, ghost_cluster=self.ghost_cluster).to(self.device)
         x = ghost_vlad(x_fc_center)
+
+        # # Avg & Flatten
+        # avg_pool = nn.AvgPool2d(kernel_size=(1, 5), stride=(1, 1)).to(self.device)
+        # x = avg_pool(x)
+        # x = torch.reshape(x, (x.shape[0], -1))
 
         # Fully Connected
         fc_layer = nn.Linear(in_features=x.shape[1], out_features=512).to(self.device)
@@ -291,7 +295,7 @@ class ThinResnet34GhostVLAD(nn.Module):
         # nn.init.orthogonal_(output_layer.weight)
         pred_logits = output_layer(embedding)
 
-        softmax = nn.Softmax()
+        softmax = nn.Softmax(dim=1)
         pred_logits = softmax(pred_logits)
 
         # return
