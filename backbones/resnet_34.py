@@ -1,3 +1,4 @@
+# https://arxiv.org/pdf/2009.14153.pdf
 # https://github.com/clovaai/voxceleb_trainer/tree/master
 
 import torch

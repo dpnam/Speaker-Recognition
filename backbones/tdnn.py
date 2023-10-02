@@ -1,8 +1,10 @@
+# https://www.danielpovey.com/files/2018_icassp_xvectors.pdf
+# https://github.com/cvqluu/TDNN
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# https://www.danielpovey.com/files/2015_interspeech_multisplice.pdf
 class TDNN(nn.Module):
     def __init__(self, input_dim=23, output_dim=512, context_size=5,
                 stride=1, dilation=1, batch_norm=False, dropout_p=0.2):

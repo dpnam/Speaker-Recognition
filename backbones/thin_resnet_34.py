@@ -1,4 +1,7 @@
+# https://arxiv.org/pdf/1902.10107.pdf
+# https://github.com/WeidiXie/VGG-Speaker-Recognition
 # https://github.com/jackaduma/SpeakerRecognition-ResNet-GhostVLAD/tree/main
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
