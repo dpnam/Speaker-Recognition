@@ -1,6 +1,7 @@
 # https://arxiv.org/pdf/2009.14153.pdf
 # https://github.com/clovaai/voxceleb_trainer/tree/master
 
+import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -124,7 +125,7 @@ class ResNetSE34(nn.Module):
         self.layer4 = self._make_layer(block, num_filters[3], layers[3], stride=(2, 2))
 
         self.instancenorm = nn.InstanceNorm1d(num_feature)
-        outmap_size = int((self.num_feature+1)/8)
+        outmap_size = math.ceil((self.num_feature)/8)
 
         self.attention = nn.Sequential(
             nn.Conv1d(num_filters[3] * outmap_size, 128, kernel_size=1),
