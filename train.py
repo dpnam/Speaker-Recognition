@@ -94,6 +94,7 @@ def main():
     model_utils['map_id2name'] = map_id2name
 
     train_params = {}
+    train_params['batch_size'] = batch_size
     train_params['num_epoch'] = num_epoch
     train_params['early_stop_thresh'] = early_stop_thresh
     train_params['meta_train_path'] = meta_train_path

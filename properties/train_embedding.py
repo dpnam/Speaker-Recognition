@@ -138,11 +138,12 @@ class TrainEmbedding():
         early_stop_thresh = train_params['early_stop_thresh']
         meta_train_path = train_params['meta_train_path']
 
+        num_feature = data_loader_train.get_num_feature()
+        num_class = data_loader_train.get_num_class()
+
         data_loader_train = DataLoader(data_generator_train, batch_size=batch_size, shuffle=True, collate_fn=collate_batch)
         data_loader_validation = DataLoader(data_generator_validation, batch_size=batch_size, shuffle=True, collate_fn=collate_batch)
 
-        num_feature = data_loader_train.get_num_feature()
-        num_class = data_loader_train.get_num_class()
 
         # init model
         if (model_name == 'XVector'):
