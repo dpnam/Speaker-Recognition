@@ -1,6 +1,7 @@
 import json
 import torch
 import numpy as np
+from tqdm import tqdm
 
 from properties.utils import *
 from sklearn.metrics import *
@@ -34,7 +35,7 @@ class TrainEmbedding():
 
          # train
         model.train()
-        for i_batch, sample_batched in enumerate(data_loader_train):
+        for i_batch, sample_batched in tqdm(enumerate(data_loader_train)):
             # process input, output
             features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
             features = features[:, None, :, :] if (model_name == 'Resnet34') else features
@@ -92,7 +93,7 @@ class TrainEmbedding():
             predict_s = []
             label_s = []
 
-            for i_batch, sample_batched in enumerate(data_loader_validation):
+            for i_batch, sample_batched in tqdm(enumerate(data_loader_validation)):
                 # process input, output
                 features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
                 features = features[:, None, :, :] if (model_name == 'Resnet34') else features
