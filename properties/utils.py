@@ -259,7 +259,6 @@ class FeatureExtraction:
     if (type_feature == 'mfcc'):
       filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=2048, n_filter=128)
       feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
-      feature = filter_banks
 
     elif (type_feature == 'es-mfcc'):
       envelope_params, frames = self.es(frames)
