@@ -365,7 +365,7 @@ class DataGenerator():
         return num_feature
     
     def get_num_class(self):
-        return self.db_generator['speaker_id'].nunique()
+        return self.db_generator['label'].nunique()
 
 def collate_batch(batch):
   features_s = []
