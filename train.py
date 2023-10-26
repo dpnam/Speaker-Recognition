@@ -61,7 +61,7 @@ def main():
     map_id2name = {key: value for key, value in enumerate(map_name2id)}
 
     speaker_id_s = [map_name2id[speaker_name] for speaker_name in speaker_name_s]
-    train_wave_paths, train_label_s, validation_wave_paths, validation_label_s = train_test_split(wave_paths, speaker_id_s, test_size=0.2)
+    train_wave_paths, validation_wave_paths, train_label_s, validation_label_s = train_test_split(wave_paths, speaker_id_s, test_size=0.2)
 
     ## 80% train
     train_audio_utils = {}
@@ -76,15 +76,13 @@ def main():
     validation_audio_utils['unknow_label'] = unknow_id
     
     feature_params = {}
+    feature_params['batch_size'] = batch_size
     feature_params['max_duration'] = max_duration
     feature_params['type_feature'] = type_feature
     feature_params['scale_window'] = scale_window
 
     dataset_train = DataGenerator(train_audio_utils, feature_params)
-    data_loader_train = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, collate_fn=collate_batch)
-
-    dataset_val = DataGenerator(validation_wave_paths, feature_params)
-    data_loader_validation = DataLoader(dataset_val, batch_size=batch_size, shuffle=True, collate_fn=collate_batch)
+    dataset_validation = DataGenerator(validation_audio_utils, feature_params)
 
     # training
     print('>> Training')
@@ -101,12 +99,15 @@ def main():
     train_params['meta_train_path'] = meta_train_path
 
     learn_obj = TrainEmbedding()
-    learn_obj.train(model_utils, data_loader_train, data_loader_validation, train_params)
+    learn_obj.train(model_utils, dataset_train, dataset_validation, train_params)
 
     # extract embedding
     print('>> Extract Embedding')
 
+    data_loader_train = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, collate_fn=collate_batch)
     train_embeddings, train_labels = learn_obj.get_embedding_loader(meta_train_path, data_loader_train)
+
+    data_loader_validation = DataLoader(dataset_validation, batch_size=batch_size, shuffle=True, collate_fn=collate_batch)
     validation_embeddings, validation_labels = learn_obj.get_embedding_loader(meta_train_path, data_loader_validation)
 
     total_embeddings = train_embeddings + validation_embeddings

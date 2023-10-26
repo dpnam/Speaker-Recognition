@@ -2,7 +2,9 @@ import json
 import torch
 import numpy as np
 
+from properties.utils import *
 from sklearn.metrics import *
+from torch.utils.data import DataLoader
 
 import sys
 sys.path.insert(1, '../backbones')
@@ -121,7 +123,7 @@ class TrainEmbedding():
             print(f'>> Validation: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision}')
             return mean_loss, mean_acc, mean_precision
         
-    def train(self, model_utils, data_loader_train, data_loader_validation, train_params):
+    def train(self, model_utils, data_generator_train, data_generator_validation, train_params):
         # params
         device = self.device
 
@@ -130,9 +132,13 @@ class TrainEmbedding():
         map_name2id = model_utils['map_name2id']
         map_id2name = model_utils['map_id2name']
 
+        batch_size = train_params['batch_size']
         num_epoch = train_params['num_epoch']
         early_stop_thresh = train_params['early_stop_thresh']
         meta_train_path = train_params['meta_train_path']
+
+        data_loader_train = DataLoader(data_generator_train, batch_size=batch_size, shuffle=True, collate_fn=collate_batch)
+        data_loader_validation = DataLoader(data_generator_validation, batch_size=batch_size, shuffle=True, collate_fn=collate_batch)
 
         num_feature = data_loader_train.get_num_feature()
         num_class = data_loader_train.get_num_class()
