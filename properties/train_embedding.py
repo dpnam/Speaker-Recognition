@@ -47,7 +47,7 @@ class TrainEmbedding():
 
             # feed-forward model
             pred_logits, embeddings = model(features)
-            pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
+            # pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
 
             # loss
             loss = loss_func(pred_logits, labels)
@@ -103,7 +103,7 @@ class TrainEmbedding():
 
                 # feed-forward model
                 pred_logits, embeddings = model(features)
-                pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
+                # pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
 
                 # loss
                 loss = loss_func(pred_logits, labels)
