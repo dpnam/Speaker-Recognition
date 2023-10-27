@@ -306,7 +306,7 @@ class DataGenerator():
                 sub_wave = wave[start_position: end_position]
                 vad = VoiceActivityDetector(sub_wave, sample_rate)
                 speech_ratio = vad.speech_ratio(use_window=False)
-                label = label if (speech_ratio >= 0.6) else unknow_label
+                # label = label if (speech_ratio >= 0.6) else unknow_label
 
                 # next postition
                 start_position += sub_wave_lenght
