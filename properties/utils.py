@@ -257,12 +257,14 @@ class FeatureExtraction:
     frames = self.framing(emphasized_wave, frame_size=frame_size, frame_stride=frame_stride)
 
     if (type_feature == 'mfcc'):
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=2048, n_filter=128)
+      # filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=2048, n_filter=128)
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=1024, n_filter=40)
       feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
 
     elif (type_feature == 'es-mfcc'):
       envelope_params, frames = self.es(frames)
-      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=2048, n_filter=128)
+      # filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=2048, n_filter=128)
+      filter_banks, energy_frames = self.mel_filterbank(frames, low_freq=0, high_freq=sample_rate/2, n_fft=1024, n_filter=40)
       feature = self.mfcc(filter_banks, energy_frames, num_ceptral=13, cep_lifter=26)
       feature = np.concatenate((envelope_params, feature), axis=1)
 
@@ -351,10 +353,16 @@ class DataGenerator():
         
         # feature extraction
         feature = FeatureExtraction(wave, sample_rate).run(select_max_duration, select_type_feature, select_scale_window)
+        
         sample = {
             'features': torch.from_numpy(np.ascontiguousarray(feature)),
             'label': torch.from_numpy(np.ascontiguousarray(label))
             }
+
+        # sample = {
+        #     'features': feature,
+        #     'label': label
+        #     }
         
         # return
         return sample

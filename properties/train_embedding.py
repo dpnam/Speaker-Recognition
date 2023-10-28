@@ -311,5 +311,4 @@ class TrainEmbedding():
             for embedding in embeddings.detach().cpu().numpy():
                 embedding_s.append(embedding)
 
-        
         return embedding_s
