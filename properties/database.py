@@ -48,7 +48,6 @@ class DataBase():
         sub_wave_lenght = max_duration * sample_rate
 
         while (start_position < (len(wave) - sub_wave_lenght)):
-            index_audio += 1
             end_position = start_position + sub_wave_lenght
             end_position = (len(wave) - 1) if (end_position >= len(wave)) else end_position
 
