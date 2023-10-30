@@ -61,7 +61,7 @@ def main():
     map_id2name = {key: value for key, value in enumerate(map_name2id)}
 
     speaker_id_s = [map_name2id[speaker_name] for speaker_name in speaker_name_s]
-    train_wave_paths, validation_wave_paths, train_label_s, validation_label_s = train_test_split(wave_paths, speaker_id_s, test_size=0.2)
+    train_wave_paths, validation_wave_paths, train_label_s, validation_label_s = train_test_split(wave_paths, speaker_id_s, stratify=speaker_id_s, test_size=0.2)
 
     ## 80% train
     train_audio_utils = {}
