@@ -15,7 +15,7 @@ def get_args():
     parser.add_argument('--meta_train_path', type=str, default='/models/meta_data_ECAPA_TDNN.json')
     parser.add_argument('--embedding_path', type=str, default='/embeddings/embedding_ECAPA_TDNN.json')
 
-    parser.add_argument('--result_path', type=str, default='/result/result_query.csv')
+    parser.add_argument('--result_path', type=str, default='/results/result_query.csv')
 
     args = parser.parse_args()
     return args
@@ -46,7 +46,7 @@ def main():
     feature_params['type_feature'] = type_feature
     feature_params['scale_window'] = scale_window
 
-    total_result_query = pd.DatFrame()
+    total_result_query = pd.DataFrame()
 
     for wave_path in wave_paths:
         print(f'>> query: {wave_path}')

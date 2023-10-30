@@ -13,7 +13,7 @@ from properties.utils import EER, minDCF
 
 def performance(result_path):
     result_query = pd.read_csv(result_path)
-    result_query['truth_speaker'] = result_query['audio_path'].str.split('/')[-2] 
+    result_query['truth_speaker'] = result_query['audio_path'].str.split('/').str[-1].str.split('_').str[0]
     result_query['label'] = (result_query['truth_speaker'] == result_query['predict_speaker'])
 
     labels = result_query['label'].tolist()

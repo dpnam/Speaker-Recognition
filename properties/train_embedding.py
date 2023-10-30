@@ -47,7 +47,6 @@ class TrainEmbedding():
 
             # feed-forward model
             pred_logits, embeddings = model(features)
-            # pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
 
             # loss
             loss = loss_func(pred_logits, labels)
@@ -55,6 +54,7 @@ class TrainEmbedding():
             optimizer.step()
             loss_s.append(loss.item())
             
+            # pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
             predictions = np.argmax(pred_logits.detach().cpu().numpy(), axis=1)
             for predict in predictions:
                 predict_s.append(predict)
@@ -103,12 +103,12 @@ class TrainEmbedding():
 
                 # feed-forward model
                 pred_logits, embeddings = model(features)
-                # pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
 
                 # loss
                 loss = loss_func(pred_logits, labels)
                 loss_s.append(loss.item())
             
+                # pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
                 predictions = np.argmax(pred_logits.detach().cpu().numpy(), axis=1)
                 for predict in predictions:
                     predict_s.append(predict)
@@ -303,7 +303,6 @@ class TrainEmbedding():
         with torch.no_grad():
             features = torch.from_numpy(np.asarray(features)).float().to(device)
             features = features[:, None, :, :] if (model_name == 'Resnet34') else features
-            print(features.shape)
 
             # feed-forward model
             pred_logits, embeddings = model(features)
