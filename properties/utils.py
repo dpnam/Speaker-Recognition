@@ -292,52 +292,48 @@ class DataGenerator():
         # process
         db_generator = pd.DataFrame()
         for index in range(len(audio_paths)):
-            audio_path = audio_paths[index]
-            label = labels[index]
+            try:
+              audio_path = audio_paths[index]
+              label = labels[index]
 
-            wave, sample_rate = sf.read(audio_path)
+              wave, sample_rate = sf.read(audio_path)
 
-            if scale_window:
-              # scan and split 1 audio
-              start_position = 0
-              sub_wave_lenght = max_duration * sample_rate
-              while (start_position < (len(wave) - sub_wave_lenght)):
-                  try:
-                    end_position = start_position + sub_wave_lenght
-                    end_position = (len(wave) - 1) if (end_position >= len(wave)) else end_position
+              if scale_window:
+                start_position = 0
+                end_position = (len(wave) - 1)
 
-                    # check VAD and pre-process speaker_name
-                    sub_wave = wave[start_position: end_position]
-                    vad = VoiceActivityDetector(sub_wave, sample_rate)
-                    speech_ratio = vad.speech_ratio(use_window=False)
-                    # label = label if (speech_ratio >= 0.6) else unknow_label
+                # check VAD and pre-process speaker_name
+                sub_wave = wave[start_position: end_position]
+                vad = VoiceActivityDetector(sub_wave, sample_rate)
+                speech_ratio = vad.speech_ratio(use_window=False)
+                # label = label if (speech_ratio >= 0.6) else unknow_label
 
-                    # next postition
-                    start_position += sub_wave_lenght
+                # save in db
+                row = {
+                  'audio_path': audio_path,
+                  'label': label,
+                  'start_position': start_position, 
+                  'end_position': end_position
+                  }
+                
+                db_generator = pd.concat([db_generator, pd.DataFrame([row])], ignore_index=True)
 
-                    # save in db
-                    row = {
-                      'audio_path': audio_path,
-                      'label': label,
-                      'start_position': start_position, 
-                      'end_position': end_position
-                      }
-                    
-                    db_generator = pd.concat([db_generator, pd.DataFrame([row])], ignore_index=True)
-                  
-                  except:
-                     pass
-
-            else:
-                try:
-                  start_position = 0
-                  end_position = (len(wave) - 1)
+              else:
+                # scan and split 1 audio
+                start_position = 0
+                sub_wave_lenght = max_duration * sample_rate
+                while (start_position < (len(wave) - sub_wave_lenght)):
+                  end_position = start_position + sub_wave_lenght
+                  end_position = (len(wave) - 1) if (end_position >= len(wave)) else end_position
 
                   # check VAD and pre-process speaker_name
                   sub_wave = wave[start_position: end_position]
                   vad = VoiceActivityDetector(sub_wave, sample_rate)
                   speech_ratio = vad.speech_ratio(use_window=False)
                   # label = label if (speech_ratio >= 0.6) else unknow_label
+
+                  # next postition
+                  start_position += sub_wave_lenght
 
                   # save in db
                   row = {
@@ -349,8 +345,8 @@ class DataGenerator():
                   
                   db_generator = pd.concat([db_generator, pd.DataFrame([row])], ignore_index=True)
 
-                except:
-                  pass
+            except:
+              pass
 
         db_generator = db_generator.sample(frac=1).reset_index(drop=True)
         db_generator = db_generator.reset_index().rename(columns={'index': 'query_index'})
@@ -369,7 +365,7 @@ class DataGenerator():
         db_generator = self.db_generator
 
         # get params
-        speaker_data = db_generator[db_generator['query_index'] == index].copy()
+        speaker_data = db_generator[db_generator['query_index'] == index].squeeze()
         audio_path = speaker_data['audio_path']
         label = speaker_data['label']
         start_position = speaker_data['start_position']
