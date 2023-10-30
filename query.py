@@ -49,9 +49,13 @@ def main():
     total_result_query = pd.DataFrame()
 
     for wave_path in wave_paths:
-        print(f'>> query: {wave_path}')
-        result_query = db_embedding.query(wave_path, feature_params, meta_train_path)
-        total_result_query = pd.concat([total_result_query, result_query], ignore_index=True)
+        try:
+            print(f'>> query: {wave_path}')
+            result_query = db_embedding.query(wave_path, feature_params, meta_train_path)
+            total_result_query = pd.concat([total_result_query, result_query], ignore_index=True)
+
+        except:
+            pass
 
     # save result
     total_result_query.to_csv(result_path, sep=',', index=False)
