@@ -76,7 +76,6 @@ def main():
     validation_audio_utils['unknow_label'] = unknow_id
     
     feature_params = {}
-    feature_params['batch_size'] = batch_size
     feature_params['max_duration'] = max_duration
     feature_params['type_feature'] = type_feature
     feature_params['scale_window'] = scale_window

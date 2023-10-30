@@ -120,5 +120,5 @@ class DataBase():
         result_query['audio_path'] = audio_path
 
         # return
-        result = result[['audio_path', 'index_audio', 'speech_ratio', 'predict_speaker', 'distance']]
-        return result
+        result_query = result_query[['audio_path', 'index_audio', 'speech_ratio', 'predict_speaker', 'similarity']]
+        return result_query
