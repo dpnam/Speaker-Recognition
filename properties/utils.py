@@ -332,9 +332,6 @@ class DataGenerator():
                   speech_ratio = vad.speech_ratio(use_window=False)
                   # label = label if (speech_ratio >= 0.6) else unknow_label
 
-                  # next postition
-                  start_position += sub_wave_lenght
-
                   # save in db
                   row = {
                     'audio_path': audio_path,
@@ -342,8 +339,10 @@ class DataGenerator():
                     'start_position': start_position, 
                     'end_position': end_position
                     }
-                  
                   db_generator = pd.concat([db_generator, pd.DataFrame([row])], ignore_index=True)
+                  
+                  # next postition
+                  start_position += sub_wave_lenght
 
             except:
               pass
