@@ -53,6 +53,8 @@ def main():
 
     with open(data) as f_read:
         wave_paths = f_read.readlines()
+    
+    wave_paths = [wave_path.replace('\n', '') for wave_path in wave_paths]
     speaker_name_s = [wave_path.split('/')[-2] for wave_path in wave_paths]
 
     map_name2id  = {key: value for value, key in enumerate(set(speaker_name_s))}
