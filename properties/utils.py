@@ -331,6 +331,9 @@ class DataGenerator():
                   vad = VoiceActivityDetector(sub_wave, sample_rate)
                   speech_ratio = vad.speech_ratio(use_window=False)
                   # label = label if (speech_ratio >= 0.6) else unknow_label
+                  
+                  if speech_ratio < 0.6:
+                    continue
 
                   # save in db
                   row = {
