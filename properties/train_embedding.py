@@ -7,11 +7,12 @@ from properties.utils import *
 from sklearn.metrics import *
 from torch.utils.data import DataLoader
 
-import sys
-sys.path.insert(1, '../backbones')
-from tdnn import XVector
-from resnet_34 import ResNetSE34
-from ecapa_tdnn import ECAPA_TDNN
+# import sys
+# sys.path.insert(1, '../backbones')
+
+from backbones.tdnn import XVector
+from backbones.resnet_34 import ResNetSE34
+from backbones.ecapa_tdnn import ECAPA_TDNN
 
 class TrainEmbedding():
     def __init__(self):
