@@ -9,7 +9,7 @@ def get_args():
     parser.add_argument('--data', type=str, default='/data/test.txt')
 
     parser.add_argument('--max_duration', type=int, default=1)
-    parser.add_argument('--type_feature', type=int, default='mfcc')
+    parser.add_argument('--type_feature', type=str, default='mfcc')
     parser.add_argument('--scale_window', type=bool, default=False)
 
     parser.add_argument('--meta_train_path', type=str, default='/models/meta_data_ECAPA_TDNN.json')
