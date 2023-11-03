@@ -39,7 +39,7 @@ class TrainEmbedding():
         for i_batch, sample_batched in tqdm(enumerate(data_loader_train)):
             # process input, output
             features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
-            features = features[:, None, :, :] if (model_name == 'Resnet34') else features
+            features = features[:, None, :, :] if (model_name == 'resnet34') else features
             labels = torch.from_numpy(np.asarray([torch_tensor[0].numpy() for torch_tensor in sample_batched[1]]))
             
             features, labels = features.to(device), labels.to(device)
@@ -97,7 +97,7 @@ class TrainEmbedding():
             for i_batch, sample_batched in tqdm(enumerate(data_loader_validation)):
                 # process input, output
                 features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
-                features = features[:, None, :, :] if (model_name == 'Resnet34') else features
+                features = features[:, None, :, :] if (model_name == 'resnet34') else features
                 labels = torch.from_numpy(np.asarray([torch_tensor[0].numpy() for torch_tensor in sample_batched[1]]))
                 
                 features, labels = features.to(device), labels.to(device)
@@ -146,13 +146,13 @@ class TrainEmbedding():
         data_loader_validation = DataLoader(data_generator_validation, batch_size=batch_size, shuffle=True, collate_fn=collate_batch)
 
         # init model
-        if (model_name == 'XVector'):
+        if (model_name == 'xvector'):
             model = XVector(num_feature, num_class).to(device)
 
-        elif (model_name == 'Resnet34'):
+        elif (model_name == 'resnet34'):
             model = ResNetSE34(num_feature, num_class).to(device)
 
-        elif (model_name == 'ECAPA-TDNN'):
+        elif (model_name == 'ecapa_tdnn'):
             model = ECAPA_TDNN(num_feature, num_class).to(device)
 
         optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.0, betas=(0.9, 0.98), eps=1e-9)
@@ -233,13 +233,13 @@ class TrainEmbedding():
         num_class = config_model['num_class']
 
         # init model
-        if (model_name == 'XVector'):
+        if (model_name == 'xvector'):
             model = XVector(num_feature, num_class).to(device)
 
-        elif (model_name == 'Resnet34'):
+        elif (model_name == 'resnet34'):
             model = ResNetSE34(num_feature, num_class).to(device)
 
-        elif (model_name == 'ECAPA-TDNN'):
+        elif (model_name == 'ecapa_tdnn'):
             model = ECAPA_TDNN(num_feature, num_class).to(device)
 
         # load best model
@@ -254,7 +254,7 @@ class TrainEmbedding():
             for i_batch, sample_batched in enumerate(data_loader):
                 # process input, output
                 features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
-                features = features[:, None, :, :] if (model_name == 'Resnet34') else features
+                features = features[:, None, :, :] if (model_name == 'resnet34') else features
 
                 labels = torch.from_numpy(np.asarray([torch_tensor[0].numpy() for torch_tensor in sample_batched[1]]))
                 features, labels = features.to(device), labels.to(device)
@@ -284,13 +284,13 @@ class TrainEmbedding():
         num_class = config_model['num_class']
 
         # init model
-        if (model_name == 'XVector'):
+        if (model_name == 'xvector'):
             model = XVector(num_feature, num_class).to(device)
 
-        elif (model_name == 'Resnet34'):
+        elif (model_name == 'resnet34'):
             model = ResNetSE34(num_feature, num_class).to(device)
 
-        elif (model_name == 'ECAPA-TDNN'):
+        elif (model_name == 'ecapa-tdnn'):
             model = ECAPA_TDNN(num_feature, num_class).to(device)
 
         # load best model
@@ -303,7 +303,7 @@ class TrainEmbedding():
         model.eval()
         with torch.no_grad():
             features = torch.from_numpy(np.asarray(features)).float().to(device)
-            features = features[:, None, :, :] if (model_name == 'Resnet34') else features
+            features = features[:, None, :, :] if (model_name == 'resnet34') else features
 
             # feed-forward model
             pred_logits, embeddings = model(features)

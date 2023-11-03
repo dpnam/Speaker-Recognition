@@ -1,12 +1,12 @@
 # Params:
 ## --type_feature: mfcc, es-mfcc
-## --model_name: XVector, Resnet34, ECAPA_TDNN
+## --model_name: xvector, eesnet34, ecapa_tdnn
 
 # Run embedding
-# python train.py --data practices/vivos/data/train.txt --type_feature mfcc --model_name XVector --meta_train_path practices/vivos/models/meta_data_mfcc_XVector.json --model_path practices/vivos/models/best_weight_mfcc_XVector.pt --embedding_path practices/vivos/embeddings/embedding_mfcc_XVector.json
+# python train.py --data practices/vivos/data/train.txt --type_feature mfcc --model_name ecapa_tdnn
 
 # Run query
-# python query.py --data practices/vivos/data/test.txt --type_feature mfcc --meta_train_path practices/vivos/models/meta_data_mfcc_XVector.json --embedding_path practices/vivos/embeddings/embedding_mfcc_XVector.json --result_path practices/vivos/results/result_query_mfcc_XVector.csv
+# python query.py --data practices/vivos/data/test.txt --type_feature mfcc --model_name ecapa_tdnn
 
 import pandas as pd
 from properties.utils import EER, minDCF
