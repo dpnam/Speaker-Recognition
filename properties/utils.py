@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 import librosa as lb
 import soundfile as sf
@@ -291,7 +292,7 @@ class DataGenerator():
 
         # process
         db_generator = pd.DataFrame()
-        for index in range(len(audio_paths)):
+        for index in tqdm(range(len(audio_paths))):
             try:
               audio_path = audio_paths[index]
               label = labels[index]
@@ -330,10 +331,7 @@ class DataGenerator():
                   sub_wave = wave[start_position: end_position]
                   vad = VoiceActivityDetector(sub_wave, sample_rate)
                   speech_ratio = vad.speech_ratio(use_window=False)
-                  # label = label if (speech_ratio >= 0.6) else unknow_label
-                  
-                  if speech_ratio < 0.6:
-                    continue
+                  # label = label if (speech_ratio >= 0.6) else unknow_labe
 
                   # save in db
                   row = {
@@ -348,7 +346,7 @@ class DataGenerator():
                   start_position += sub_wave_lenght
 
             except:
-              pass
+              continue
 
         db_generator = db_generator.sample(frac=1).reset_index(drop=True)
         db_generator = db_generator.reset_index().rename(columns={'index': 'query_index'})
