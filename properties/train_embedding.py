@@ -7,9 +7,6 @@ from properties.utils import *
 from sklearn.metrics import *
 from torch.utils.data import DataLoader
 
-# import sys
-# sys.path.insert(1, '../backbones')
-
 from backbones.tdnn import XVector
 from backbones.resnet_34 import ResNetSE34
 from backbones.ecapa_tdnn import ECAPA_TDNN
@@ -39,7 +36,7 @@ class TrainEmbedding():
         for i_batch, sample_batched in tqdm(enumerate(data_loader_train)):
             # process input, output
             if (model_name == 'resnet34'):
-                features = torch.from_numpy(np.asarray([torch_tensor.T.numpy() for torch_tensor in sample_batched[0]])).float()
+                features = torch.from_numpy(np.asarray([torch_tensor.numpy().T for torch_tensor in sample_batched[0]])).float()
                 features = features[:, None, :, :]
             else:
                 features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
@@ -101,7 +98,7 @@ class TrainEmbedding():
             for i_batch, sample_batched in tqdm(enumerate(data_loader_validation)):
                 # process input, output
                 if (model_name == 'resnet34'):
-                    features = torch.from_numpy(np.asarray([torch_tensor.T.numpy() for torch_tensor in sample_batched[0]])).float()
+                    features = torch.from_numpy(np.asarray([torch_tensor.numpy().T for torch_tensor in sample_batched[0]])).float()
                     features = features[:, None, :, :]
                 else:
                     features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
@@ -262,7 +259,7 @@ class TrainEmbedding():
             for i_batch, sample_batched in enumerate(data_loader):
                 # process input, output
                 if (model_name == 'resnet34'):
-                    features = torch.from_numpy(np.asarray([torch_tensor.T.numpy() for torch_tensor in sample_batched[0]])).float()
+                    features = torch.from_numpy(np.asarray([torch_tensor.numpy().T for torch_tensor in sample_batched[0]])).float()
                     features = features[:, None, :, :]
                 else:
                     features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
