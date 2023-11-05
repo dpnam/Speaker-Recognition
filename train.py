@@ -42,7 +42,7 @@ def main():
   practices_path = data.split('/data')[0]
   type_window = 'scale' if (scale_window == True) else 'orgin'
   meta_train_path = '{}/models/meta_{}_{}s_{}_{}.json'.format(practices_path, type_window, max_duration, type_feature, model_name)
-  model_path = '{}/models/weights_{}_{}s_{}_{}.json'.format(practices_path, type_window, max_duration, type_feature, model_name)
+  model_path = '{}/models/weights_{}_{}s_{}_{}.pt'.format(practices_path, type_window, max_duration, type_feature, model_name)
   embedding_path = '{}/embeddings/embeddings_{}_{}s_{}_{}.json'.format(practices_path, type_window, max_duration, type_feature, model_name)
 
   # data generator
