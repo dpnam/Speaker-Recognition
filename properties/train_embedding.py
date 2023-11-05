@@ -38,8 +38,12 @@ class TrainEmbedding():
         model.train()
         for i_batch, sample_batched in tqdm(enumerate(data_loader_train)):
             # process input, output
-            features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
-            features = features[:, None, :, :] if (model_name == 'resnet34') else features
+            if (model_name == 'resnet34'):
+                features = torch.from_numpy(np.asarray([torch_tensor.T.numpy() for torch_tensor in sample_batched[0]])).float()
+                features = features[:, None, :, :]
+            else:
+                features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
+
             labels = torch.from_numpy(np.asarray([torch_tensor[0].numpy() for torch_tensor in sample_batched[1]]))
             
             features, labels = features.to(device), labels.to(device)
@@ -96,8 +100,12 @@ class TrainEmbedding():
 
             for i_batch, sample_batched in tqdm(enumerate(data_loader_validation)):
                 # process input, output
-                features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
-                features = features[:, None, :, :] if (model_name == 'resnet34') else features
+                if (model_name == 'resnet34'):
+                    features = torch.from_numpy(np.asarray([torch_tensor.T.numpy() for torch_tensor in sample_batched[0]])).float()
+                    features = features[:, None, :, :]
+                else:
+                    features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
+
                 labels = torch.from_numpy(np.asarray([torch_tensor[0].numpy() for torch_tensor in sample_batched[1]]))
                 
                 features, labels = features.to(device), labels.to(device)
@@ -253,10 +261,14 @@ class TrainEmbedding():
         with torch.no_grad():
             for i_batch, sample_batched in enumerate(data_loader):
                 # process input, output
-                features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
-                features = features[:, None, :, :] if (model_name == 'resnet34') else features
+                if (model_name == 'resnet34'):
+                    features = torch.from_numpy(np.asarray([torch_tensor.T.numpy() for torch_tensor in sample_batched[0]])).float()
+                    features = features[:, None, :, :]
+                else:
+                    features = torch.from_numpy(np.asarray([torch_tensor.numpy() for torch_tensor in sample_batched[0]])).float()
 
                 labels = torch.from_numpy(np.asarray([torch_tensor[0].numpy() for torch_tensor in sample_batched[1]]))
+                
                 features, labels = features.to(device), labels.to(device)
 
                 # feed-forward model
@@ -302,9 +314,12 @@ class TrainEmbedding():
         # eval
         model.eval()
         with torch.no_grad():
-            features = torch.from_numpy(np.asarray(features)).float().to(device)
-            features = features[:, None, :, :] if (model_name == 'resnet34') else features
-
+            if (model_name == 'resnet34'):
+                features = torch.from_numpy(np.asarray(features).T).float().to(device)
+                features = features[:, None, :, :]
+            else:
+                features = torch.from_numpy(np.asarray(features)).float().to(device)
+            
             # feed-forward model
             pred_logits, embeddings = model(features)
 
