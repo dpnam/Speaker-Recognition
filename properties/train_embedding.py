@@ -290,7 +290,7 @@ class TrainEmbedding():
         elif (model_name == 'resnet34'):
             model = ResNetSE34(num_feature, num_class).to(device)
 
-        elif (model_name == 'ecapa-tdnn'):
+        elif (model_name == 'ecapa_tdnn'):
             model = ECAPA_TDNN(num_feature, num_class).to(device)
 
         # load best model
