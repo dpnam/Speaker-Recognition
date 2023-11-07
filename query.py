@@ -36,7 +36,7 @@ def main():
     type_window = 'scale' if scale_window else 'orgin'
     meta_train_path = '{}/models/meta_{}_{}s_{}_{}.json'.format(practices_path, type_window, max_duration, type_feature, model_name)
     embedding_path = '{}/embeddings/embeddings_{}_{}s_{}_{}.json'.format(practices_path, type_window, max_duration, type_feature, model_name)
-    result_path = '{}/results/results_{}_{}s_{}_{}.json'.format(practices_path, type_window, max_duration, type_feature, model_name)
+    result_path = '{}/results/results_{}_{}s_{}_{}.csv'.format(practices_path, type_window, max_duration, type_feature, model_name)
 
     # load database
     db_embedding = DataBase(embedding_path)
