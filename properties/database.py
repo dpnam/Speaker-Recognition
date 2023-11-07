@@ -47,7 +47,7 @@ class DataBase():
         start_position = 0
         sub_wave_lenght = max_duration * sample_rate
 
-        while (start_position < (len(wave) - sub_wave_lenght)):
+        while (start_position < len(wave)):
             end_position = start_position + sub_wave_lenght
             end_position = (len(wave) - 1) if (end_position >= len(wave)) else end_position
 
@@ -75,9 +75,6 @@ class DataBase():
 
         info_query = pd.DataFrame()
         index_embedding = 0
-        speaker_s = []
-        distance_s = []
-
         for embedding_query in embedding_query_s:
             if len(active_speaker_s) == 0:
               break
@@ -88,14 +85,10 @@ class DataBase():
             curr_speaker_s = active_speaker_s
             curr_distance_s = [vp_tree_speaker[speaker].get_nearest_neighbor(embedding_query)[0] for speaker in active_speaker_s]
 
-            # storage
-            speaker_s += curr_speaker_s
-            distance_s += curr_distance_s
-
             # update
             curr_info_query = pd.DataFrame()
-            curr_info_query['predict_speaker'] = speaker_s
-            curr_info_query['distance'] = distance_s
+            curr_info_query['predict_speaker'] = curr_speaker_s
+            curr_info_query['distance'] = curr_distance_s
             curr_info_query['index_embedding'] = index_embedding
             curr_info_query['speech_ratio'] = speech_ratio_s[index_embedding - 1]
 
