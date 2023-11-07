@@ -1,5 +1,6 @@
 import argparse
 import pandas as pd
+import numpy as np
 from sklearn.metrics import *
 
 from properties.utils import EER, minDCF
@@ -64,8 +65,11 @@ def main():
             pass
 
     # print metric
-    label_s = total_result_query['audio_path'].str.split('/').str[-1].str.split('_').str[0].tolist()
+    total_result_query['truth_speaker'] = total_result_query['audio_path'].str.split('/').str[-1].str.split('_').str[0]
+    label_s = total_result_query['truth_speaker'].tolist()
     predict_s = total_result_query['predict_speaker'].tolist()
+
+    binary_label_s = (total_result_query['truth_speaker'] == total_result_query['predict_speaker').tolist()
     score_s = total_result_query['similarity'].tolist()
 
     mean_acc = round(accuracy_score(label_s, predict_s), 4)
