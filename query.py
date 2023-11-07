@@ -69,14 +69,14 @@ def main():
     label_s = total_result_query['truth_speaker'].tolist()
     predict_s = total_result_query['predict_speaker'].tolist()
 
-    binary_label_s = (total_result_query['truth_speaker'] == total_result_query['predict_speaker').tolist()
+    binary_label_s = (total_result_query['truth_speaker'] == total_result_query['predict_speaker']).tolist()
     score_s = total_result_query['similarity'].tolist()
 
     mean_acc = round(accuracy_score(label_s, predict_s), 4)
     mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 2)
 
-    eer = round(EER(label_s, score_s), 4)
-    min_dcf = round(minDCF(label_s, score_s, p_target=0.05, c_miss=1, c_fa=1), 4)
+    eer = round(EER(binary_label_s, score_s), 4)
+    min_dcf = round(minDCF(binary_label_s, score_s, p_target=0.05, c_miss=1, c_fa=1), 4)
 
     metric_text = 'Results: acc = {}, precision = {}, eer = {}, min_dcf = {}'.format(mean_acc, mean_precision, eer, min_dcf)
     print(metric_text)
