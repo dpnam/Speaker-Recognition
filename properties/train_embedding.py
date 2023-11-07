@@ -312,7 +312,8 @@ class TrainEmbedding():
         model.eval()
         with torch.no_grad():
             if (model_name == 'resnet34'):
-                features = torch.from_numpy(np.asarray(features).T).float().to(device)
+                features = [feature.T for feature in features]
+                features = torch.from_numpy(np.asarray(features)).float().to(device)
                 features = features[:, None, :, :]
             else:
                 features = torch.from_numpy(np.asarray(features)).float().to(device)
