@@ -28,6 +28,7 @@ class TrainEmbedding():
 
         # init monitor
         loss_s = []
+        proba_s = []
         predict_s = []
         label_s = []
 
@@ -56,20 +57,33 @@ class TrainEmbedding():
             optimizer.step()
             loss_s.append(loss.item())
             
-            # pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
+            # softmax
+            pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
+
+            # save proba, predict and label
+            probabilities = np.max(pred_logits.detach().cpu().numpy(), axis=1)
+            for probability in probabilities:
+                proba_s.append(probability)
+            
             predictions = np.argmax(pred_logits.detach().cpu().numpy(), axis=1)
             for predict in predictions:
                 predict_s.append(predict)
 
             for label in labels.detach().cpu().numpy():
                 label_s.append(label)
-                
+        
+        # check binary label
+        binary_label_s = [1 if (predict==label) else 0 for predict, label in zip(predict_s, label_s)]
+
         # metrics
+        mean_loss = round(np.mean(np.asarray(loss_s)), 4)
         mean_acc = round(accuracy_score(label_s, predict_s), 4)
         mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 4)
-        mean_loss = round(np.mean(np.asarray(loss_s)), 4)
 
-        print(f'>> Training: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision}')
+        eer = round(EER(binary_label_s, proba_s)[0], 4)
+        min_dcf = round(minDCF(binary_label_s, proba_s, p_target=0.05, c_miss=1, c_fa=1)[0], 4)
+        
+        print(f'>> Training: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision} =>  eer = {eer}, min_dcf = {min_dcf}')
 
         # save
         model_utils['model'] = model
@@ -92,6 +106,7 @@ class TrainEmbedding():
         with torch.no_grad():
             # init monitor
             loss_s = []
+            proba_s = []
             predict_s = []
             label_s = []
 
@@ -114,21 +129,36 @@ class TrainEmbedding():
                 loss = loss_func(pred_logits, labels)
                 loss_s.append(loss.item())
             
-                # pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
+                # softmax
+                pred_logits = torch.nn.Softmax(dim=1)(pred_logits)
+
+                # save proba, predict and label
+                probabilities = np.max(pred_logits.detach().cpu().numpy(), axis=1)
+                for probability in probabilities:
+                    proba_s.append(probability)
+
                 predictions = np.argmax(pred_logits.detach().cpu().numpy(), axis=1)
                 for predict in predictions:
                     predict_s.append(predict)
 
                 for label in labels.detach().cpu().numpy():
                     label_s.append(label)
-                    
+            
+            # check binary label
+            binary_label_s = [1 if (predict==label) else 0 for predict, label in zip(predict_s, label_s)]
+            
             # metrics
-            mean_acc = round(accuracy_score(label_s, predict_s), 4)
-            mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 2)
             mean_loss = round(np.mean(np.asarray(loss_s)), 4)
+            mean_acc = round(accuracy_score(label_s, predict_s), 4)
+            mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 4)
 
-            print(f'>> Validation: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision}')
-            return mean_loss, mean_acc, mean_precision
+            eer = round(EER(binary_label_s, proba_s)[0], 4)
+            min_dcf = round(minDCF(binary_label_s, proba_s, p_target=0.05, c_miss=1, c_fa=1)[0], 4)
+            
+            print(f'>> Training: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision} =>  eer = {eer}, min_dcf = {min_dcf}')
+
+            # return
+            return mean_loss, mean_acc, mean_precision, eer, min_dcf
         
     def train(self, model_utils, data_generator_train, data_generator_validation, train_params):
         # params
@@ -171,15 +201,53 @@ class TrainEmbedding():
         # init monitor
         best_metric = -1
         best_epoch = -1
+        meta_train_dict = {}
 
         torch.set_grad_enabled(True)
         for epoch in range(num_epoch):
+            epoch = str(epoch).zfill(3)
             print(f'Epoch #{epoch}:')
 
+            # learn
             model_utils = self._train_unit(model_utils, data_loader_train)
-            loss_val, acc_val, precision_val = self._validation_unit(model_utils, data_loader_validation)
+            loss_train, acc_train, precision_train, eer_train, min_dcf_train = self._validation_unit(model_utils, data_loader_train)
+            loss_val, acc_val, precision_val, eer_val, min_dcf_val = self._validation_unit(model_utils, data_loader_validation)
 
-            cur_metric = precision_val
+            # save history training weights
+            weights_path = '/'.join(model_path.split('/')[:-1]) + '/weights'
+            name_model_path = model_path.split('/')[-1].replace('best_', '').replace('.pt', '')
+            name_meta_train_path = model_path.split('/')[-1].replace('best_weight_', '').replace('.pt', '')
+
+            curr_model_path = '{}/{}_epoch_{}.pt'.format(weights_path, name_model_path, epoch)
+            torch.save(model_utils['model'].state_dict(), curr_model_path)
+
+            curr_meta_train_dict = {
+                f'epoch: #{epoch}': {
+                    'model_path': curr_model_path,
+                    'train': {
+                        'loss': loss_train, 
+                        'accuracy': acc_train,
+                        'precision': precision_train,
+                        'eer': eer_train,
+                        'min_dcf': min_dcf_train
+                    } ,
+                    'validation': {
+                        'loss': loss_val, 
+                        'accuracy': acc_val,
+                        'precision': precision_val,
+                        'eer': eer_val,
+                        'min_dcf': min_dcf_val
+                    }
+                }
+                }
+        
+            meta_train_dict.update(curr_meta_train_dict)
+            meta_train_path = '{}/history_{}.json'.format(weights_path, name_meta_train_path)
+            with open(meta_train_path, "w") as outfile:
+                json.dump(meta_train_dict, outfile)
+
+            # save best weight
+            cur_metric = -eer_val
             if cur_metric > best_metric:
                 best_metric = cur_metric
                 best_epoch = epoch
@@ -193,8 +261,8 @@ class TrainEmbedding():
         # get result
         model.load_state_dict(torch.load(model_path))
         model_utils['model'] = model
-        loss_train, acc_train, precision_train = self._validation_unit(model_utils, data_loader_train)
-        loss_val, acc_val, precision_val = self._validation_unit(model_utils, data_loader_validation)
+        loss_train, acc_train, precision_train, eer_train, min_dcf_train = self._validation_unit(model_utils, data_loader_train)
+        loss_val, acc_val, precision_val, eer_val, min_dcf_val = self._validation_unit(model_utils, data_loader_validation)
 
         # save meta data
         meta_data_dict = {
@@ -212,11 +280,15 @@ class TrainEmbedding():
                     'loss': loss_train, 
                     'accuracy': acc_train,
                     'precision': precision_train,
+                    'eer': eer_train,
+                    'min_dcf': min_dcf_train
                 } ,
                 'validation': {
                     'loss': loss_val, 
                     'accuracy': acc_val,
                     'precision': precision_val,
+                    'eer': eer_val,
+                    'min_dcf': min_dcf_val
                 }
             }
             }
