@@ -3,9 +3,9 @@ from re import U
 import numpy as np
 import soundfile as sf
 
-from utils import *
-from train_embedding import TrainEmbedding
-from vptree import VPTree
+from properties.utils import *
+from properties.train_embedding import TrainEmbedding
+from properties.vptree import VPTree
 
 # Euclidean distance function
 def euclid_distance(P1, P2):
