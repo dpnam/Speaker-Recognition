@@ -20,7 +20,7 @@ def performance(result_path):
     scores = result_query['similarity'].tolist()
 
     eer = EER(labels, scores)
-    min_dcf = minDCF(labels, scores, p_target=0.05, c_miss=1, c_fa=1)
+    min_dcf = minDCF(labels, scores, p_target=0.01, c_miss=1, c_fa=1)
 
     print(f'EER: {eer}')
     print(f'minDCF: {min_dcf}')

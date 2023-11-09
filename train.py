@@ -18,7 +18,7 @@ def get_args():
   parser.add_argument('--model_name', type=str, default='ecapa_tdnn')
   parser.add_argument('--batch_size', type=int, default=64)
   parser.add_argument('--num_epoch', type=int, default=256)
-  parser.add_argument('--early_stop_thresh', type=int, default=10)
+  parser.add_argument('--early_stop_thresh', type=int, default=5)
   
   args = parser.parse_args()
   return args

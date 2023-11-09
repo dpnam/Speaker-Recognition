@@ -76,7 +76,7 @@ def main():
     mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 4)
 
     eer = EER(binary_label_s, score_s)
-    min_dcf = minDCF(binary_label_s, score_s, p_target=0.05, c_miss=1, c_fa=1)
+    min_dcf = minDCF(binary_label_s, score_s, p_target=0.01, c_miss=1, c_fa=1)
 
     print('Results:')
     print(f'>> Accuracy: {mean_acc}')

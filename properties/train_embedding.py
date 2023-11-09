@@ -16,7 +16,7 @@ class TrainEmbedding():
         use_cuda = torch.cuda.is_available()
         self.device = torch.device("cuda" if use_cuda else "cpu")
 
-    def _train_unit(self, model_utils, data_loader_train, print_result=True):
+    def _train_unit(self, model_utils, data_loader_train):
         # get params
         device = self.device
 
@@ -81,19 +81,18 @@ class TrainEmbedding():
         mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 4)
 
         eer = round(EER(binary_label_s, proba_s)[0], 4)
-        min_dcf = round(minDCF(binary_label_s, proba_s, p_target=0.05, c_miss=1, c_fa=1)[0], 4)
+        min_dcf = round(minDCF(binary_label_s, proba_s, p_target=0.01, c_miss=1, c_fa=1)[0], 4)
 
-        if print_result:
-            print(f'>> Training: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision} =>  eer = {eer}, min_dcf = {min_dcf}')
+        print(f'>> Training: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision} =>  eer = {eer}, min_dcf = {min_dcf}')
 
         # save
         model_utils['model'] = model
         model_utils['optimizer'] = optimizer
         model_utils['loss_func'] = loss_func
 
-        return model_utils
+        return mean_loss, mean_acc, mean_precision, eer, min_dcf, model_utils
 
-    def _validation_unit(self, model_utils, data_loader_validation, print_result=True):
+    def _validation_unit(self, model_utils, data_loader_validation):
         # get params
         device = self.device
 
@@ -154,10 +153,9 @@ class TrainEmbedding():
             mean_precision = round(precision_score(label_s, predict_s, average='macro', labels=np.unique(predict_s)), 4)
 
             eer = round(EER(binary_label_s, proba_s)[0], 4)
-            min_dcf = round(minDCF(binary_label_s, proba_s, p_target=0.05, c_miss=1, c_fa=1)[0], 4)
+            min_dcf = round(minDCF(binary_label_s, proba_s, p_target=0.01, c_miss=1, c_fa=1)[0], 4)
 
-            if print_result:
-                print(f'>> Validation: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision} =>  eer = {eer}, min_dcf = {min_dcf}')
+            print(f'>> Validation: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision} =>  eer = {eer}, min_dcf = {min_dcf}')
 
             # return
             return mean_loss, mean_acc, mean_precision, eer, min_dcf
@@ -203,7 +201,7 @@ class TrainEmbedding():
         # init monitor
         best_metric = -1
         best_epoch = -1
-        meta_train_dict = {}
+        history_meta_train_dict = {}
 
         torch.set_grad_enabled(True)
         for epoch in range(num_epoch):
@@ -211,9 +209,8 @@ class TrainEmbedding():
             print(f'Epoch #{str_epoch}:')
 
             # learn
-            model_utils = self._train_unit(model_utils, data_loader_train)
-            loss_train, acc_train, precision_train, eer_train, min_dcf_train = self._validation_unit(model_utils, data_loader_train, False)
-            loss_val, acc_val, precision_val, eer_val, min_dcf_val = self._validation_unit(model_utils, data_loader_validation, True)
+            loss_train, acc_train, precision_train, eer_train, min_dcf_train, model_utils = self._train_unit(model_utils, data_loader_train)
+            loss_val, acc_val, precision_val, eer_val, min_dcf_val = self._validation_unit(model_utils, data_loader_validation)
 
             # save history training weights
             weights_path = '/'.join(model_path.split('/')[:-1]) + '/weights'
@@ -243,10 +240,10 @@ class TrainEmbedding():
                 }
                 }
         
-            meta_train_dict.update(curr_meta_train_dict)
-            meta_train_path = '{}/history_{}.json'.format(weights_path, name_meta_train_path)
-            with open(meta_train_path, "w") as outfile:
-                json.dump(meta_train_dict, outfile)
+            history_meta_train_dict.update(curr_meta_train_dict)
+            history_meta_train_path = '{}/history_{}.json'.format(weights_path, name_meta_train_path)
+            with open(history_meta_train_path, "w") as outfile:
+                json.dump(history_meta_train_dict, outfile)
 
             # save best weight
             cur_metric = -eer_val
@@ -263,8 +260,8 @@ class TrainEmbedding():
         # get result
         model.load_state_dict(torch.load(model_path))
         model_utils['model'] = model
-        loss_train, acc_train, precision_train, eer_train, min_dcf_train = self._validation_unit(model_utils, data_loader_train, True)
-        loss_val, acc_val, precision_val, eer_val, min_dcf_val = self._validation_unit(model_utils, data_loader_validation, True)
+        loss_train, acc_train, precision_train, eer_train, min_dcf_train = self._validation_unit(model_utils, data_loader_train)
+        loss_val, acc_val, precision_val, eer_val, min_dcf_val = self._validation_unit(model_utils, data_loader_validation)
 
         # save meta data
         meta_data_dict = {
