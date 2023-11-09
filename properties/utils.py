@@ -323,7 +323,7 @@ class DataGenerator():
                 # scan and split 1 audio
                 start_position = 0
                 sub_wave_lenght = max_duration * sample_rate
-                while (start_position < (len(wave) - sub_wave_lenght)):
+                while (start_position < len(wave)):
                   end_position = start_position + sub_wave_lenght
                   end_position = (len(wave) - 1) if (end_position >= len(wave)) else end_position
 
