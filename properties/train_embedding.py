@@ -16,7 +16,7 @@ class TrainEmbedding():
         use_cuda = torch.cuda.is_available()
         self.device = torch.device("cuda" if use_cuda else "cpu")
 
-    def _train_unit(self, model_utils, data_loader_train):
+    def _train_unit(self, model_utils, data_loader_train, print_result=True):
         # get params
         device = self.device
 
@@ -82,8 +82,9 @@ class TrainEmbedding():
 
         eer = round(EER(binary_label_s, proba_s)[0], 4)
         min_dcf = round(minDCF(binary_label_s, proba_s, p_target=0.05, c_miss=1, c_fa=1)[0], 4)
-        
-        print(f'>> Training: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision} =>  eer = {eer}, min_dcf = {min_dcf}')
+
+        if print_result:
+            print(f'>> Training: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision} =>  eer = {eer}, min_dcf = {min_dcf}')
 
         # save
         model_utils['model'] = model
@@ -92,7 +93,7 @@ class TrainEmbedding():
 
         return model_utils
 
-    def _validation_unit(self, model_utils, data_loader_validation):
+    def _validation_unit(self, model_utils, data_loader_validation, print_result=True):
         # get params
         device = self.device
 
@@ -154,8 +155,9 @@ class TrainEmbedding():
 
             eer = round(EER(binary_label_s, proba_s)[0], 4)
             min_dcf = round(minDCF(binary_label_s, proba_s, p_target=0.05, c_miss=1, c_fa=1)[0], 4)
-            
-            print(f'>> Training: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision} =>  eer = {eer}, min_dcf = {min_dcf}')
+
+            if print_result:
+                print(f'>> Validation: loss = {mean_loss},  accuracy = {mean_acc}, precision = {mean_precision} =>  eer = {eer}, min_dcf = {min_dcf}')
 
             # return
             return mean_loss, mean_acc, mean_precision, eer, min_dcf
@@ -210,8 +212,8 @@ class TrainEmbedding():
 
             # learn
             model_utils = self._train_unit(model_utils, data_loader_train)
-            loss_train, acc_train, precision_train, eer_train, min_dcf_train = self._validation_unit(model_utils, data_loader_train)
-            loss_val, acc_val, precision_val, eer_val, min_dcf_val = self._validation_unit(model_utils, data_loader_validation)
+            loss_train, acc_train, precision_train, eer_train, min_dcf_train = self._validation_unit(model_utils, data_loader_train, False)
+            loss_val, acc_val, precision_val, eer_val, min_dcf_val = self._validation_unit(model_utils, data_loader_validation, True)
 
             # save history training weights
             weights_path = '/'.join(model_path.split('/')[:-1]) + '/weights'
@@ -261,8 +263,8 @@ class TrainEmbedding():
         # get result
         model.load_state_dict(torch.load(model_path))
         model_utils['model'] = model
-        loss_train, acc_train, precision_train, eer_train, min_dcf_train = self._validation_unit(model_utils, data_loader_train)
-        loss_val, acc_val, precision_val, eer_val, min_dcf_val = self._validation_unit(model_utils, data_loader_validation)
+        loss_train, acc_train, precision_train, eer_train, min_dcf_train = self._validation_unit(model_utils, data_loader_train, True)
+        loss_val, acc_val, precision_val, eer_val, min_dcf_val = self._validation_unit(model_utils, data_loader_validation, True)
 
         # save meta data
         meta_data_dict = {
