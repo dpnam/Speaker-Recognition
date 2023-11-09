@@ -205,8 +205,8 @@ class TrainEmbedding():
 
         torch.set_grad_enabled(True)
         for epoch in range(num_epoch):
-            epoch = str(epoch).zfill(3)
-            print(f'Epoch #{epoch}:')
+            str_epoch = str(epoch).zfill(3)
+            print(f'Epoch #{str_epoch}:')
 
             # learn
             model_utils = self._train_unit(model_utils, data_loader_train)
@@ -218,11 +218,11 @@ class TrainEmbedding():
             name_model_path = model_path.split('/')[-1].replace('best_', '').replace('.pt', '')
             name_meta_train_path = model_path.split('/')[-1].replace('best_weight_', '').replace('.pt', '')
 
-            curr_model_path = '{}/{}_epoch_{}.pt'.format(weights_path, name_model_path, epoch)
+            curr_model_path = '{}/{}_epoch_{}.pt'.format(weights_path, name_model_path, str_epoch)
             torch.save(model_utils['model'].state_dict(), curr_model_path)
 
             curr_meta_train_dict = {
-                f'epoch: #{epoch}': {
+                f'epoch {str_epoch}': {
                     'model_path': curr_model_path,
                     'train': {
                         'loss': loss_train, 
